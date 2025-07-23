@@ -1,3 +1,4 @@
+import Utils.DBConnection
 import models.User
 import dao.UserDAO
 import menu.TripSearchMenu
@@ -62,7 +63,7 @@ def main(): Unit = {
           TripMenu.afficherMenu(user)
 
         case 3 =>
-          println("Messagerie")
+          MessageMenu.afficherMenu(user)
 
         case 4 =>
           val result = UserMenu.gestionCompte(user)
@@ -75,9 +76,9 @@ def main(): Unit = {
         case _ =>
           println("Commande invalide !")
       }
-      }
     }
   }
+}
 
 
 
