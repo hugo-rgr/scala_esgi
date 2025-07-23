@@ -194,4 +194,23 @@ object UserDAO {
         userId
     }
   }
+
+  def userFindById(id: Int): Option[User] = {
+    val requete = "SELECT * FROM User WHERE user_id = ?"
+    val statement = DBConnection.connection.prepareStatement(requete)
+    statement.setInt(1, id)
+    val result = statement.executeQuery()
+
+    if (result.next()) {
+      Some(User(
+        userId = result.getInt("user_id"),
+        nom = result.getString("user_name"),
+        vehicule = result.getString("user_vehicule"),
+        note = result.getInt("user_note"),
+        nombreNote = result.getInt("user_nb_notes")
+      ))
+    } else {
+      None
+    }
+  }
 }

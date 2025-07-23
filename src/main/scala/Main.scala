@@ -1,6 +1,8 @@
 import Utils.DBConnection
 import models.User
 import dao.UserDAO
+import menu.TripSearchMenu
+
 import scala.io.StdIn
 
 @main
@@ -54,7 +56,7 @@ def main(): Unit = {
 
       choix match {
         case 1 =>
-          println("Utilisateur")
+          TripSearchMenu.display()
 
         case 2 =>
           println("Reservation")
