@@ -8,6 +8,7 @@ object UserDAO {
 
   def getUserByIdentifiant(identifiant: String): User = {
     val requete = "SELECT * FROM USER WHERE user_name = ?"
+
     val statement = DBConnection.connection.prepareStatement(requete)
     statement.setString(1, identifiant)
 
@@ -59,5 +60,24 @@ object UserDAO {
     val statement = DBConnection.connection.prepareStatement(requete)
     statement.setInt(1, userId)
     statement.executeUpdate() > 0
+  }
+
+  def userFindById(id: Int): Option[User] = {
+    val requete = "SELECT * FROM User WHERE user_id = ?"
+    val statement = DBConnection.connection.prepareStatement(requete)
+    statement.setInt(1, id)
+    val result = statement.executeQuery()
+
+    if (result.next()) {
+      Some(User(
+        userId = result.getInt("user_id"),
+        nom = result.getString("user_name"),
+        vehicule = result.getString("user_vehicule"),
+        note = result.getInt("user_note"),
+        nombreNote = result.getInt("user_nb_notes")
+      ))
+    } else {
+      None
+    }
   }
 }

@@ -1,8 +1,11 @@
 import models.User
 import dao.UserDAO
+import menu.TripSearchMenu
+
 import menu.UserMenu
 
 import scala.io.StdIn
+import menu.TripMenu  // Import du nouveau module
 
 @main
 def main(): Unit = {
@@ -53,10 +56,10 @@ def main(): Unit = {
 
       choix match {
         case 1 =>
-          println("Utilisateur")
+          TripSearchMenu.display()
 
         case 2 =>
-          println("Reservation")
+          TripMenu.afficherMenu(user)
 
         case 3 =>
           println("Messagerie")
