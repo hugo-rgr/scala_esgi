@@ -9,5 +9,6 @@ case class Trip(
   tripDate: LocalDateTime,
   tripDriverUserId: Int,
   tripReservationId: Int,
-  tripPassengersSeatsNumber: Int
+  tripPassengersSeatsNumber: Int,
+  tripPrice: BigDecimal
 )
