@@ -8,7 +8,6 @@ case class Trip(
   tripArrivalCityId: Int,
   tripDate: LocalDateTime,
   tripDriverUserId: Int,
-  tripReservationId: Int,
   tripPassengersSeatsNumber: Int,
   tripPrice: BigDecimal
 )
