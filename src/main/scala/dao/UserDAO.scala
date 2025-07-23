@@ -8,7 +8,7 @@ object UserDAO {
 
   def getUserByIdentifiant(identifiant: String): User = {
     val requete = "SELECT * FROM USER WHERE user_name = ?"
-
+    
     val statement = DBConnection.connection.prepareStatement(requete)
     statement.setString(1, identifiant)
 
