@@ -1,5 +1,4 @@
 package Utils
-
 import io.github.cdimascio.dotenv.Dotenv
 
 object Config {
