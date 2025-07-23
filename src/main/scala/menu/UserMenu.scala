@@ -14,14 +14,15 @@ object UserMenu {
     print("Mot de passe : ")
     val password = StdIn.readLine()
 
-    UserDAO.getUserByIdentifiant(identifiant) match {
-      case user if UserDAO.checkPassword(user, password) =>
-        println(s"Bienvenue ${user.nom} !")
-        user
-      case _ =>
-        println("Identifiant ou mot de passe incorrect.")
-        null
+    val user = UserDAO.getUserByIdentifiant(identifiant)
+    if (user != null && UserDAO.checkPassword(user, password)) {
+      println("Bienvenue !")
+      user
+    } else {
+      println("Identifiant ou mot de passe incorrect.")
+      null
     }
+
   }
 
   def inscription(): User = {
