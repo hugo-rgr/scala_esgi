@@ -7,8 +7,8 @@ def main(): Unit = {
 
   while (continue) {
     if (user != null) {
-      println("Inscription")
-      println("Connexion")
+      println("1: Inscription")
+      println("2: Connexion")
 
       println("Selectionnez une action")
       val choix = StdIn.readInt()
