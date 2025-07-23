@@ -177,11 +177,14 @@ object TripMenu {
     val heureFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("HH'h'mm"))
     val reservations = ReservationDAO.findByTripId(trajet.tripId)
 
+    // Fetch the actual driver information from database
+    val conducteur = UserDAO.userFindById(trajet.tripDriverUserId).getOrElse(user)
+
     println(s"\n| Détail du trajet")
     println(s"| $villeDepart → $villeArrivee")
-    println(s"| Conducteur : ${user.nom} (${if (user.nombreNote > 0) user.note.formatted("%.1f") else "Pas de note"}/5)")
+    println(s"| Conducteur : ${conducteur.nom} (${if (conducteur.nombreNote > 0) conducteur.note.formatted("%.1f") else "Pas de note"}/5)")
     println(s"| Départ : $dateFormatee $heureFormatee")
-    println(s"| Véhicule : ${user.vehicule}")
+    println(s"| Véhicule : ${conducteur.vehicule}")
     println(s"| Prix : ${trajet.tripPrice} €")
     println(s"| ${trajet.tripPassengersSeatsNumber} places restantes")
 
