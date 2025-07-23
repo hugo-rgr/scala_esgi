@@ -1,0 +1,3 @@
+package dao
+
+object Default
