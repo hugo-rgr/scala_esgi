@@ -104,8 +104,8 @@ object MessageMenu
 
   private def afficherEnvoyes(user: User): Unit = {
     val maintenant = LocalDateTime.now()
-    val tousLesTrajets = MessageDAO.findEcrits()
-    val trajetsPassees = tousLesTrajets.filter(t =>
+    val tousLesTrajets = MessageDAO.findEcrits(user.userId)
+    /*val trajetsPassees = tousLesTrajets.filter(t =>
       t.tripDriverUserId == user.userId && t.tripDate.isBefore(maintenant)
     ).sortBy(_.tripDate)(Ordering[LocalDateTime].reverse)
 
@@ -138,7 +138,7 @@ object MessageMenu
           println("Choix invalide !")
         }
       }
-    }
+    }*/
   }
   
   private def obtenirDest(nomUser: String): Int = {
