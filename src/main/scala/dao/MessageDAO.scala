@@ -37,7 +37,7 @@ object MessageDAO {
         content = result.getString("message_content"),
         senderuid = result.getInt("sender_user_id"),
         recipientuid = result.getInt("recipient_user_id"),
-        date = LocalDateTime.parse(result.getString("message_date"))
+        date = result.getTimestamp("message_date").toLocalDateTime
       )
       msgs = msg :: msgs
     }
@@ -56,7 +56,7 @@ object MessageDAO {
         content = result.getString("message_content"),
         senderuid = result.getInt("sender_user_id"),
         recipientuid = result.getInt("recipient_user_id"),
-        date = LocalDateTime.parse(result.getString("message_date"))
+        date = result.getTimestamp("message_date").toLocalDateTime
       )
       msgs = msg :: msgs
     }
@@ -75,7 +75,7 @@ object MessageDAO {
         content = result.getString("message_content"),
         senderuid = result.getInt("sender_user_id"),
         recipientuid = result.getInt("recipient_user_id"),
-        date = LocalDateTime.parse(result.getString("message_date"))
+        date = result.getTimestamp("message_date").toLocalDateTime
       ))
     } else {
       None

@@ -67,7 +67,6 @@ object MessageMenu
   }
 
   private def afficherRecus(user: User): Unit = {
-    val maintenant = LocalDateTime.now()
     val messages = MessageDAO.findReceived(user.userId)
 
     var continuer = true
@@ -89,21 +88,14 @@ object MessageMenu
           println(s"$msg")
         }
 
-        println("\nSelectionnez une action")
-        val choix = StdIn.readInt()
-
-        if (choix == 0) {
-          continuer = false
-        } else {
-          println("Choix invalide !")
-        }
+        val choix = StdIn.readLine()
+        return
       }
     }
   }
 
   private def afficherEnvoyes(user: User): Unit = {
-    val maintenant = LocalDateTime.now()
-    val messages = MessageDAO.findReceived(user.userId)
+    val messages = MessageDAO.findEcrits(user.userId)
 
     var continuer = true
     while (continuer) {
@@ -124,14 +116,8 @@ object MessageMenu
           println(s"$msg")
         }
 
-        println("\nSelectionnez une action")
-        val choix = StdIn.readInt()
-
-        if (choix == 0) {
-          continuer = false
-        } else {
-          println("Choix invalide !")
-        }
+        val choix = StdIn.readLine()
+        return
       }
     }
   }
