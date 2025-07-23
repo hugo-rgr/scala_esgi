@@ -1,6 +1,6 @@
 import Utils.DBConnection
 import models.User
-import dao.userConnexion
+import dao.UserDAO
 import scala.io.StdIn
 import menu.TripMenu  // Import du nouveau module
 
@@ -23,13 +23,13 @@ def main(): Unit = {
 
       choix match {
         case 1 =>
-          user = dao.userInscription()
+          user = UserDAO.userInscription()
             if(user==null)
               println("/!\\ Erreur lors de l'inscription")
             else
               println("///Inscription reussie")
         case 2 =>
-          user = dao.userConnexion()
+          user = UserDAO.userConnexion()
           if(user == null)
             println("/!\\ Nom d'utilisateur ou mots de passe incorect ")
           else
@@ -62,10 +62,22 @@ def main(): Unit = {
 
         case 3 =>
           println("Messagerie")
+
+        case 4 =>
+          val result = UserDAO.gestionCompte(user.userId)
+          if(result == 0)
+            user = null
+        case 5 =>
+          println("A bientôt")
+          continue = false
+
+        case _ =>
+          println("Commande invalide !")
+      }
       }
     }
   }
 
 
-}
+
 
