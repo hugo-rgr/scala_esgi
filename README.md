@@ -5,6 +5,11 @@
     - `src/ressources/Blablacar.sql` (creates database structure)
     - `src/ressources/fake_data.sql` (populates test data)
 2. Configure `.env` file with database credentials
+```
+DB_URL = "jdbc:mysql://127.0.0.1:3306/DBNAME"
+DB_USER = "login"
+DB_PASS = "pwd"
+```
 3. Start the application
 
 ## Test User Credentials
