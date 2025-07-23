@@ -4,6 +4,7 @@ import dao.UserDAO
 import menu.TripSearchMenu
 
 import scala.io.StdIn
+import menu.TripMenu  // Import du nouveau module
 
 @main
 def main(): Unit = {
@@ -59,7 +60,7 @@ def main(): Unit = {
           TripSearchMenu.display()
 
         case 2 =>
-          println("Reservation")
+          TripMenu.afficherMenu(user)
 
         case 3 =>
           println("Messagerie")

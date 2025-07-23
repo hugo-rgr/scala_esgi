@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 object TripDAO {
   def find(id: Int): Option[Trip] = {
-    val requete = "SELECT * FROM Trip WHERE id = ?"
+    val requete = "SELECT * FROM Trip WHERE trip_id = ?"
     val statement = DBConnection.connection.prepareStatement(requete)
     statement.setInt(1, id)
     val result = statement.executeQuery()
@@ -56,7 +56,7 @@ object TripDAO {
   }
 
   def findAll(): List[Trip] = {
-    val requete = "SELECT * FROM trips"
+    val requete = "SELECT * FROM Trip"
     val statement = DBConnection.connection.createStatement()
     val result = statement.executeQuery(requete)
     var trips = List[Trip]()
@@ -77,17 +77,14 @@ object TripDAO {
   }
 
   def insert(trip: Trip): Unit = {
-    val requete = "INSERT INTO Trip " +
-      "(trip_departure_city_id, trip_arrival_city_id, trip_date, trip_driver_user_id, " +
-      "trip_passengers_seats_number, trip_price) " +
-      "VALUES (?, ?, ?, ?, ?, ?, ?)"
-    val statement = DBConnection.connection.prepareStatement(requete)
+    val requete = "INSERT INTO Trip (trip_departure_city_id, trip_arrival_city_id, trip_date, trip_driver_user_id, trip_passengers_seats_number, trip_price) VALUES (?, ?, ?, ?, ?, ?)"
+    val statement = DBConnection.connection.prepareStatement(requete, java.sql.Statement.RETURN_GENERATED_KEYS)
     statement.setInt(1, trip.tripDepartureCityId)
     statement.setInt(2, trip.tripArrivalCityId)
     statement.setTimestamp(3, java.sql.Timestamp.valueOf(trip.tripDate))
     statement.setInt(4, trip.tripDriverUserId)
-    statement.setInt(6, trip.tripPassengersSeatsNumber)
-    statement.setBigDecimal(7, trip.tripPrice.bigDecimal)
+    statement.setInt(5, trip.tripPassengersSeatsNumber)
+    statement.setBigDecimal(6, trip.tripPrice.bigDecimal)
 
     statement.executeUpdate()
 
@@ -117,7 +114,7 @@ object TripDAO {
 
 
   def delete(id: Int): Unit = {
-    val requete = "DELETE FROM Trip WHERE id = ?"
+    val requete = "DELETE FROM Trip WHERE trip_id = ?"
     val statement = DBConnection.connection.prepareStatement(requete)
     statement.setInt(1, id)
     statement.executeUpdate()
