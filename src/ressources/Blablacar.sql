@@ -1,5 +1,6 @@
 CREATE DATABASE BLABLACAR;
 USE BLABLACAR;
+
 -- Create City table
 CREATE TABLE City (
                       city_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -16,24 +17,6 @@ CREATE TABLE User (
                       user_nb_notes INT NULL
 );
 
--- Create Payment table (created before Reservation due to FK dependency)
-CREATE TABLE Payment (
-                         payment_id INT PRIMARY KEY AUTO_INCREMENT,
-                         amount FLOAT NOT NULL
-);
-
--- Create Reservation table
-CREATE TABLE Reservation (
-                             reservation_id INT PRIMARY KEY AUTO_INCREMENT,
-                             passenger_user_id INT NOT NULL,
-                             is_canceled BOOLEAN NOT NULL DEFAULT FALSE,
-                             payment_id INT NOT NULL,
-                             reservation_date DATETIME NOT NULL,
-                             is_rated FLOAT NULL,
-                             FOREIGN KEY (passenger_user_id) REFERENCES User(user_id),
-                             FOREIGN KEY (payment_id) REFERENCES Payment(payment_id)
-);
-
 -- Create Trip table
 CREATE TABLE Trip (
                       trip_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -41,13 +24,24 @@ CREATE TABLE Trip (
                       trip_arrival_city_id INT NOT NULL,
                       trip_date DATETIME NOT NULL,
                       trip_driver_user_id INT NOT NULL,
-                      trip_reservation_id INT NOT NULL,
                       trip_passengers_seats_number INT NOT NULL,
                       trip_price FLOAT NOT NULL,
                       FOREIGN KEY (trip_departure_city_id) REFERENCES City(city_id),
                       FOREIGN KEY (trip_arrival_city_id) REFERENCES City(city_id),
-                      FOREIGN KEY (trip_driver_user_id) REFERENCES User(user_id),
-                      FOREIGN KEY (trip_reservation_id) REFERENCES Reservation(reservation_id)
+                      FOREIGN KEY (trip_driver_user_id) REFERENCES User(user_id)
+);
+
+-- Create Reservation table
+CREATE TABLE Reservation (
+                             res_id INT PRIMARY KEY AUTO_INCREMENT,
+                             trip_id INT NOT NULL,
+                             res_passenger_user_id INT NOT NULL,
+                             res_is_canceled BIT NOT NULL DEFAULT 0,
+                             res_passenger_trip_price FLOAT NOT NULL,
+                             res_date DATETIME NOT NULL,
+                             res_is_rated BIT NULL DEFAULT 0,
+                             FOREIGN KEY (trip_id) REFERENCES Trip(trip_id),
+                             FOREIGN KEY (res_passenger_user_id) REFERENCES User(user_id)
 );
 
 -- Create Message table
@@ -60,8 +54,3 @@ CREATE TABLE Message (
                          FOREIGN KEY (sender_user_id) REFERENCES User(user_id),
                          FOREIGN KEY (recipient_user_id) REFERENCES User(user_id)
 );
-
--- Add the missing foreign key to Payment table (circular reference)
-ALTER TABLE Payment
-    ADD COLUMN reservation_id INT NOT NULL,
-ADD FOREIGN KEY (reservation_id) REFERENCES Reservation(reservation_id);
