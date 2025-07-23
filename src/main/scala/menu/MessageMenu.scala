@@ -72,7 +72,7 @@ object MessageMenu
 
     var continuer = true
     while (continuer) {
-      println("\n| Trajets à venir")
+      println("\n| Messages reçus")
       println("0. Retour à mes trajets")
 
       if (messages.isEmpty) {
@@ -82,10 +82,11 @@ object MessageMenu
         if (choix == 0) continuer = false
       } else {
         messages.zipWithIndex.foreach { case (message, index) =>
-          /*val villeDepart = MessageDAO.find(message.).map(_.cityName).getOrElse("Inconnue")
-          val villeArrivee = CityDAO.find(trajet.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
-          val dateFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))*/
-          //println(s"${index + 1}. $villeDepart - $villeArrivee ($dateFormatee)")
+          val redacteur = UserDAO.userFindById(message.senderuid).map(_.nom).getOrElse("Inconnu")
+          val destinataire = UserDAO.userFindById(message.recipientuid).map(_.nom).getOrElse("Inconnu")
+          val msg = message.content
+          println(s"${index + 1}. From: $redacteur - To: $destinataire")
+          println(s"$msg")
         }
 
         println("\nSelectionnez une action")
@@ -93,8 +94,6 @@ object MessageMenu
 
         if (choix == 0) {
           continuer = false
-        } else if (choix > 0 && choix <= messages.length) {
-          //afficherDetailTrajet(messages(choix - 1), user)
         } else {
           println("Choix invalide !")
         }
@@ -104,27 +103,25 @@ object MessageMenu
 
   private def afficherEnvoyes(user: User): Unit = {
     val maintenant = LocalDateTime.now()
-    val tousLesTrajets = MessageDAO.findEcrits(user.userId)
-    /*val trajetsPassees = tousLesTrajets.filter(t =>
-      t.tripDriverUserId == user.userId && t.tripDate.isBefore(maintenant)
-    ).sortBy(_.tripDate)(Ordering[LocalDateTime].reverse)
+    val messages = MessageDAO.findReceived(user.userId)
 
     var continuer = true
     while (continuer) {
-      println("\n| Trajets passés")
+      println("\n| Messages envoyés")
       println("0. Retour à mes trajets")
 
-      if (trajetsPassees.isEmpty) {
-        println("Aucun trajet passé")
+      if (messages.isEmpty) {
+        println("Aucun message envoyé")
         println("\nSelectionnez une action")
         val choix = StdIn.readInt()
         if (choix == 0) continuer = false
       } else {
-        trajetsPassees.zipWithIndex.foreach { case (trajet, index) =>
-          val villeDepart = CityDAO.find(trajet.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
-          val villeArrivee = CityDAO.find(trajet.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
-          val dateFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-          println(s"${index + 1}. $villeDepart - $villeArrivee ($dateFormatee)")
+        messages.zipWithIndex.foreach { case (message, index) =>
+          val redacteur = UserDAO.userFindById(message.senderuid).map(_.nom).getOrElse("Inconnu")
+          val destinataire = UserDAO.userFindById(message.recipientuid).map(_.nom).getOrElse("Inconnu")
+          val msg = message.content
+          println(s"${index + 1}. From: $redacteur - To: $destinataire")
+          println(s"$msg")
         }
 
         println("\nSelectionnez une action")
@@ -132,13 +129,11 @@ object MessageMenu
 
         if (choix == 0) {
           continuer = false
-        } else if (choix > 0 && choix <= trajetsPassees.length) {
-          afficherDetailTrajet(trajetsPassees(choix - 1), user)
         } else {
           println("Choix invalide !")
         }
       }
-    }*/
+    }
   }
   
   private def obtenirDest(nomUser: String): Int = {
