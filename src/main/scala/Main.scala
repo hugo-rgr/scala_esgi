@@ -2,6 +2,7 @@ import Utils.DBConnection
 import models.User
 import dao.UserDAO
 import scala.io.StdIn
+import menu.TripMenu  // Import du nouveau module
 
 @main
 def main(): Unit = {
@@ -57,7 +58,7 @@ def main(): Unit = {
           println("Utilisateur")
 
         case 2 =>
-          println("Reservation")
+          TripMenu.afficherMenu(user)
 
         case 3 =>
           println("Messagerie")
