@@ -1,13 +1,13 @@
 package menu
 
 import dao.{CityDAO, ReservationDAO, TripDAO, UserDAO}
-import models.{City, Reservation, Trip}
+import models.{City, Reservation, Trip, User}
 
 import java.time.LocalDate
 
 object TripSearchMenu {
 
-  def display(): Unit = {
+  def display(user: User): Unit = {
     println("| Rechercher un trajet")
 
     println("Villes disponibles :")
@@ -73,13 +73,20 @@ object TripSearchMenu {
     println(s"Trajets trouves de ${departureCity.get.cityName} a ${arrivalCity.get.cityName} le $dateInput :")
     println("0. Retour au menu principal")
     trips.foreach { trip =>
+      val driver = UserDAO.userFindById(trip.tripDriverUserId).get
+      val noteAffichee = if (driver.nombreNote > 0) {
+        (driver.note.toDouble / driver.nombreNote).formatted("%.1f")
+      } else {
+        "Pas de note"
+      }
       println(s"${trip.tripId}." +
-        s" Conducteur: ${UserDAO.userFindById(trip.tripDriverUserId).get.nom} (${UserDAO.userFindById(trip.tripDriverUserId).get.note} etoiles)" +
+        s" Conducteur: ${driver.nom} ($noteAffichee/5 étoiles)" +
         s"\nDate: ${trip.tripDate}" +
-        s"\nPrix: ${trip.tripPrice} euros"
+        s"\nPrix: ${trip.tripPrice} euros" +
+        s"\nPlaces disponibles: ${trip.tripPassengersSeatsNumber}"
       )}
 
-    println("Selectionnez le numero du trajet que vous souhaitez reserver : ")
+    println("\nSelectionnez le numero du trajet que vous souhaitez reserver : ")
     continue = true
     var chosenTrip: Trip = null
     while (continue) {
@@ -96,10 +103,15 @@ object TripSearchMenu {
     }
 
     val driver = UserDAO.userFindById(chosenTrip.tripDriverUserId).get
+    val noteAffichee = if (driver.nombreNote > 0) {
+      (driver.note.toDouble / driver.nombreNote).formatted("%.1f")
+    } else {
+      "Pas de note"
+    }
 
     println("| Details du trajet :")
     println(s"| ${departureCity.get.cityName} - ${arrivalCity.get.cityName}")
-    println(s"| Conducteur: ${driver.nom} (${driver.note} etoiles)")
+    println(s"| Conducteur: ${driver.nom} ($noteAffichee/5 étoiles)")
     println(s"| Depart : $dateInput")
     println(s"| Vehicule : ${driver.vehicule}")
     println(s"| Prix : ${chosenTrip.tripPrice} euros")
@@ -123,14 +135,21 @@ object TripSearchMenu {
         case 0 =>
           continue = false
         case 1 =>
-          ReservationDAO.insert(Reservation(
+          // Créer la réservation avec l'utilisateur actuel comme passager
+          val nouvelleReservation = ReservationDAO.insert(Reservation(
             resId = 0, // Auto-incremented by the database
             tripId = chosenTrip.tripId,
-            resPassengerUserId = UserDAO.userFindById(chosenTrip.tripDriverUserId).get.userId,
+            resPassengerUserId = user.userId, // CORRECTION: utiliser l'ID de l'utilisateur actuel
             resIsCanceled = false,
             resPassengerTripPrice = chosenTrip.tripPrice.floatValue(),
-            resDate = java.time.LocalDateTime.now()
+            resDate = java.time.LocalDateTime.now(),
+            resIsRated = Some(false) // Initialement non noté
           ))
+
+          // Décrémenter le nombre de places disponibles
+          val tripMisAJour = chosenTrip.copy(tripPassengersSeatsNumber = chosenTrip.tripPassengersSeatsNumber - 1)
+          TripDAO.update(tripMisAJour)
+
           println("/// Trajet reserve !")
           continue = false
         case _ =>

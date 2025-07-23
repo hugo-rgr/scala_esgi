@@ -26,7 +26,7 @@ object ReservationDAO {
   }
 
   def findAll(): List[Reservation] = {
-    val requete = "SELECT * FROM Reservation AND res_is_canceled = 0"
+    val requete = "SELECT * FROM Reservation WHERE res_is_canceled = 0"
     val statement = DBConnection.connection.createStatement()
     val result = statement.executeQuery(requete)
     var reservations = List[Reservation]()

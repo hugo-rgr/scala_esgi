@@ -1,7 +1,7 @@
 import Utils.DBConnection
 import models.User
 import dao.UserDAO
-import menu.{MessageMenu, TripMenu, TripSearchMenu, UserMenu}
+import menu.{MessageMenu, TripMenu, TripSearchMenu, UserMenu, ReservationMenu}
 
 import scala.io.StdIn  // Import du nouveau module
 
@@ -23,10 +23,10 @@ def main(): Unit = {
       choix match {
         case 1 =>
           user = UserMenu.inscription()
-            if(user==null)
-              println("/!\\ Erreur lors de l'inscription")
-            else
-              println("///Inscription reussie")
+          if(user==null)
+            println("/!\\ Erreur lors de l'inscription")
+          else
+            println("///Inscription reussie")
         case 2 =>
           user = UserMenu.connexion()
           if(user == null)
@@ -42,7 +42,7 @@ def main(): Unit = {
       }
     }
     else {
-      val menu = List("Rechercher un trajet", "Mes trajets", "Mes messages","Mon compte","Quitter")
+      val menu = List("Rechercher un trajet", "Mes trajets", "Mes réservations", "Mes messages","Mon compte","Quitter")
 
       println("Menu principal :")
       for ((section, index) <- menu.zipWithIndex) {
@@ -54,19 +54,22 @@ def main(): Unit = {
 
       choix match {
         case 1 =>
-          TripSearchMenu.display()
+          TripSearchMenu.display(user)
 
         case 2 =>
           TripMenu.afficherMenu(user)
 
         case 3 =>
-          MessageMenu.afficherMenu(user)
+          ReservationMenu.afficherMenu(user)
 
         case 4 =>
+          MessageMenu.afficherMenu(user)
+
+        case 5 =>
           val result = UserMenu.gestionCompte(user)
           if(result == null)
             user = null
-        case 5 =>
+        case 6 =>
           println("A bientôt")
           continue = false
 
@@ -76,7 +79,3 @@ def main(): Unit = {
     }
   }
 }
-
-
-
-

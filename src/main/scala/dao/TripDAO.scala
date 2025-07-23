@@ -99,7 +99,7 @@ object TripDAO {
   def update(trip: Trip): Unit = {
     val requete = "UPDATE Trip SET " +
       "trip_departure_city_id = ?, trip_arrival_city_id = ?, trip_date = ?, trip_driver_user_id = ?, " +
-      "trip_passengers_seats_number = ?, trip_price = ? WHERE id = ?"
+      "trip_passengers_seats_number = ?, trip_price = ? WHERE trip_id = ?"
     val statement = DBConnection.connection.prepareStatement(requete)
     statement.setInt(1, trip.tripDepartureCityId)
     statement.setInt(2, trip.tripArrivalCityId)
@@ -111,7 +111,6 @@ object TripDAO {
 
     statement.executeUpdate()
   }
-
 
   def delete(id: Int): Unit = {
     val requete = "DELETE FROM Trip WHERE trip_id = ?"
