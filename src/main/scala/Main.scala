@@ -1,14 +1,19 @@
+import Utils.DBConnection
+import models.User
+
 import scala.io.StdIn
 
 @main
 def main(): Unit = {
-  var user: user = null
+  var user: User = null
   var continue = true
+
+  val statement = DBConnection.connection
 
   while (continue) {
     if (user != null) {
-      println("Inscription")
-      println("Connexion")
+      println("1: Inscription")
+      println("2: Connexion")
 
       println("Selectionnez une action")
       val choix = StdIn.readInt()

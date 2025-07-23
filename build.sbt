@@ -7,5 +7,6 @@ lazy val root = (project in file("."))
     name := "scala_esgi",
     libraryDependencies ++= Seq(
       "mysql" % "mysql-connector-java" % "8.0.33",
+      "io.github.cdimascio" % "java-dotenv" % "5.2.2",
     ),
   )
