@@ -1,5 +1,6 @@
 package dao
 
+import Utils.DBConnection
 import models.City
 
 import java.sql.PreparedStatement
