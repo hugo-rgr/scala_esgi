@@ -70,7 +70,7 @@ object TripSearchMenu {
       return
     }
 
-    println(s"Trajets trouves de ${departureCity.get.cityName} à ${arrivalCity.get.cityName} le $dateInput :")
+    println(s"Trajets trouves de ${departureCity.get.cityName} a ${arrivalCity.get.cityName} le $dateInput :")
     println("0. Retour au menu principal")
     trips.foreach { trip =>
       println(s"${trip.tripId}." +
