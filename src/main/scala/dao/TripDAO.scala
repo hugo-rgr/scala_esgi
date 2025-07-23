@@ -26,14 +26,14 @@ object TripDAO {
   }
 
   def findAll(): List[Trip] = {
-    val requete = "SELECT * FROM trips"
+    val requete = "SELECT * FROM Trip"
     val statement = DBConnection.connection.createStatement()
     val result = statement.executeQuery(requete)
     var trips = List[Trip]()
 
     while (result.next()) {
       val trip = Trip(
-        tripId = result.getInt("id"),
+        tripId = result.getInt("trip_id"),
         tripDepartureCityId = result.getInt("trip_departure_city_id"),
         tripArrivalCityId = result.getInt("trip_arrival_city_id"),
         tripDate = result.getTimestamp("trip_date").toLocalDateTime,
@@ -82,7 +82,7 @@ object TripDAO {
   
   
   def delete(id: Int): Unit = {
-    val requete = "DELETE FROM Trip WHERE id = ?"
+    val requete = "DELETE FROM Trip WHERE trip_id = ?"
     val statement = DBConnection.connection.prepareStatement(requete)
     statement.setInt(1, id)
     statement.executeUpdate()
