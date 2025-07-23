@@ -16,9 +16,9 @@ object MessageMenu
     while (continue) {
       if (user == null) {
         println("|Menu d'authentification")
-        println("1: Inscription")
-        println("2: Connexion")
-        println("3: Quitter")
+        println("1: Envoyer un message")
+        println("2: Messages reçus")
+        println("3: Retour au menu")
 
         println("Selectionnez une action")
         val choix = StdIn.readInt()
