@@ -33,7 +33,7 @@ object TripSearchMenu {
     }
 
     remainingCities.foreach(city => println(s"${city.cityId}. ${city.cityName}"))
-    println("\nTapez le numero de la ville d'arrivee : ")
+    print("\nTapez le numero de la ville d'arrivee : ")
     continue = true
     var arrivalCityId = 0
     var arrivalCity: Option[City] = None
@@ -74,7 +74,7 @@ object TripSearchMenu {
     println("0. Retour au menu principal")
     trips.foreach { trip =>
       println(s"${trip.tripId}." +
-        s"\n Conducteur: ${UserDAO.userFindById(trip.tripDriverUserId).get.nom} (${UserDAO.userFindById(trip.tripDriverUserId).get.note} etoiles)" +
+        s" Conducteur: ${UserDAO.userFindById(trip.tripDriverUserId).get.nom} (${UserDAO.userFindById(trip.tripDriverUserId).get.note} etoiles)" +
         s"\nDate: ${trip.tripDate}" +
         s"\nPrix: ${trip.tripPrice} euros"
       )}
@@ -106,7 +106,7 @@ object TripSearchMenu {
     println(s"| ${chosenTrip.tripPassengersSeatsNumber} places restantes")
 
     // appuyer sur une touche pour continuer la réservation
-    println("Appuyez sur une touche pour continuer la réservation")
+    println("Appuyez sur une touche pour continuer la reservation")
     scala.io.StdIn.readLine()
 
     println("| Paiement du trajet")
