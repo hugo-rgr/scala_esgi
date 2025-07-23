@@ -24,11 +24,10 @@ object MessageDAO {
     statement.execute()
   }
 
-  def findAll(id: Int): List[Message] = {
-    val requete = "SELECT * FROM Message WHERE sender_user_id = ? OR recipient_user_id = ?"
+  def findEcrits(id: Int): List[Message] = {
+    val requete = "SELECT * FROM Message WHERE sender_user_id = ?"
     val statement = DBConnection.connection.prepareStatement(requete)
     statement.setInt(1, id)
-    statement.setInt(2, id)
     val result = statement.executeQuery()
     var msgs = List[Message]()
 
@@ -45,21 +44,41 @@ object MessageDAO {
     msgs.reverse
   }
 
-  def find(uid: Int, id: Int): Option[Message] = {
-    val requete = "SELECT * FROM Message WHERE sender_user_id = ? OR recipient_user_id = ? AND message_id = ?"
+  def findReceived(id: Int): List[Message] = {
+    val requete = "SELECT * FROM Message WHERE recipient_user_id = ?"
     val statement = DBConnection.connection.prepareStatement(requete)
-    statement.setInt(1, uid)
-    statement.setInt(2, uid)
-    statement.setInt(3, id)
+    statement.setInt(1, id)
     val result = statement.executeQuery()
-    Option.when(result.next()) {
-      Message(
+    var msgs = List[Message]()
+    while (result.next()) {
+      val msg = Message(
         id = result.getInt("message_id"),
         content = result.getString("message_content"),
         senderuid = result.getInt("sender_user_id"),
         recipientuid = result.getInt("recipient_user_id"),
         date = LocalDateTime.parse(result.getString("message_date"))
       )
+      msgs = msg :: msgs
+    }
+    msgs.reverse
+  }
+
+  def find(id: Int): Option[Message] = {
+    val requete = "SELECT * FROM Message WHERE message_id = ?"
+    val statement = DBConnection.connection.prepareStatement(requete)
+    statement.setInt(1, id)
+    val result = statement.executeQuery()
+
+    if (result.next()) {
+      Some(Message(
+        id = result.getInt("message_id"),
+        content = result.getString("message_content"),
+        senderuid = result.getInt("sender_user_id"),
+        recipientuid = result.getInt("recipient_user_id"),
+        date = LocalDateTime.parse(result.getString("message_date"))
+      ))
+    } else {
+      None
     }
   }
 

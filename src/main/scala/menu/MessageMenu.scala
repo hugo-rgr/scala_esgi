@@ -1,5 +1,10 @@
 package menu
 
+import dao.{MessageDAO, UserDAO}
+import models.Message
+
+import java.time.LocalDateTime
+
 object MessageMenu
 {
 
@@ -7,68 +12,139 @@ object MessageMenu
   import models.User
   import scala.io.StdIn
 
-  def display(): Unit = {
-    var user: User = null
-    var continue = true
+  def afficherMenu(user: User): Unit = {
+    var continuer = true
 
-    val statement = DBConnection.connection
+    while (continuer) {
+      println("\n| Menu des messages")
+      println("1. Rédiger message")
+      println("2. Afficher messages reçus")
+      println("3. Afficher messages envoyés")
+      println("0. Retour au menu principal")
 
-    while (continue) {
-      if (user == null) {
-        println("|Menu d'authentification")
-        println("1: Inscription")
-        println("2: Connexion")
-        println("3: Quitter")
+      println("\nSelectionnez une action")
+      val choix = StdIn.readInt()
 
-        println("Selectionnez une action")
-        val choix = StdIn.readInt()
-
-        choix match {
-          case 1 =>
-            user = dao.userInscription()
-            if (user == null)
-              println("/!\\ Erreur lors de l'inscription")
-            else
-              println("///Inscription reussie")
-          case 2 =>
-            user = dao.userConnexion()
-            if (user == null)
-              println("/!\\ Nom d'utilisateur ou mots de passe incorect ")
-            else
-              println("///Connexion reussie")
-          case 3 =>
-            println("A bientôt")
-            continue = false
-
-          case _ =>
-            println("Commande invalide !")
-        }
+      choix match {
+        case 1 => ecrireMessage(user)
+        case 2 => afficherRecus(user)
+        case 3 => afficherEnvoyes(user)
+        case 0 => continuer = false
+        case _ => println("Commande invalide !")
       }
-      else {
-        val menu = List("Rechercher un trajet", "Mes trajets", "Mes messages", "Mon compte", "Quitter")
+    }
+  }
 
-        println("Menu principal :")
-        for ((section, index) <- menu.zipWithIndex) {
-          println(s"${index + 1} : $section")
+  private def ecrireMessage(user: User): Unit = {
+    println("\n| Rediger message")
+
+    try {
+      // Saisie ville de départ
+      println("Choissisez le destinataire : ")
+      val destinataire = StdIn.readLine().trim
+      val destinataireId = obtenirDest(destinataire)
+
+      // Saisie prix
+      println("Rédigez votre message !")
+      val msg = StdIn.readLine()
+
+      // Création du trajet
+      val message = Message(
+        id = 0, // sera généré par la base
+        content = msg,
+        senderuid = user.userId,
+        recipientuid = destinataireId,
+        date = LocalDateTime.now()
+      )
+
+      MessageDAO.insert(message)
+      println("✓ Le message a été rédigé !")
+
+    } catch {
+      case e: Exception =>
+        println(s"/!\\ Erreur lors de la rédaction du msg ! ${e.getMessage}")
+    }
+  }
+
+  private def afficherRecus(user: User): Unit = {
+    val maintenant = LocalDateTime.now()
+    val messages = MessageDAO.findReceived(user.userId)
+
+    var continuer = true
+    while (continuer) {
+      println("\n| Trajets à venir")
+      println("0. Retour à mes trajets")
+
+      if (messages.isEmpty) {
+        println("Aucun message reçu")
+        println("\nSelectionnez une action")
+        val choix = StdIn.readInt()
+        if (choix == 0) continuer = false
+      } else {
+        messages.zipWithIndex.foreach { case (message, index) =>
+          /*val villeDepart = MessageDAO.find(message.).map(_.cityName).getOrElse("Inconnue")
+          val villeArrivee = CityDAO.find(trajet.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
+          val dateFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))*/
+          //println(s"${index + 1}. $villeDepart - $villeArrivee ($dateFormatee)")
         }
 
-        println("Selectionnez une action")
+        println("\nSelectionnez une action")
         val choix = StdIn.readInt()
 
-        choix match {
-          case 1 =>
-            println("Utilisateur")
-
-          case 2 =>
-            println("Reservation")
-
-          case 3 =>
-            println("Messagerie")
+        if (choix == 0) {
+          continuer = false
+        } else if (choix > 0 && choix <= messages.length) {
+          //afficherDetailTrajet(messages(choix - 1), user)
+        } else {
+          println("Choix invalide !")
         }
       }
     }
-
-
   }
 
+  private def afficherEnvoyes(user: User): Unit = {
+    val maintenant = LocalDateTime.now()
+    val tousLesTrajets = MessageDAO.findEcrits(user.userId)
+    /*val trajetsPassees = tousLesTrajets.filter(t =>
+      t.tripDriverUserId == user.userId && t.tripDate.isBefore(maintenant)
+    ).sortBy(_.tripDate)(Ordering[LocalDateTime].reverse)
+
+    var continuer = true
+    while (continuer) {
+      println("\n| Trajets passés")
+      println("0. Retour à mes trajets")
+
+      if (trajetsPassees.isEmpty) {
+        println("Aucun trajet passé")
+        println("\nSelectionnez une action")
+        val choix = StdIn.readInt()
+        if (choix == 0) continuer = false
+      } else {
+        trajetsPassees.zipWithIndex.foreach { case (trajet, index) =>
+          val villeDepart = CityDAO.find(trajet.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
+          val villeArrivee = CityDAO.find(trajet.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
+          val dateFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+          println(s"${index + 1}. $villeDepart - $villeArrivee ($dateFormatee)")
+        }
+
+        println("\nSelectionnez une action")
+        val choix = StdIn.readInt()
+
+        if (choix == 0) {
+          continuer = false
+        } else if (choix > 0 && choix <= trajetsPassees.length) {
+          afficherDetailTrajet(trajetsPassees(choix - 1), user)
+        } else {
+          println("Choix invalide !")
+        }
+      }
+    }*/
+  }
+  
+  private def obtenirDest(nomUser: String): Int = {
+    val users = UserDAO.findAll()
+    users.find(_.nom.equalsIgnoreCase(nomUser)) match {
+      case Some(user) => user.userId
+    }
+  }
 }

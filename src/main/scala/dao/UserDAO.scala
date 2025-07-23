@@ -213,4 +213,22 @@ object UserDAO {
       None
     }
   }
+
+  def findAll(): List[User] = {
+    val requete = "SELECT * FROM User"
+    val statement = DBConnection.connection.prepareStatement(requete)
+    val result = statement.executeQuery()
+    var users = List[User]()
+    while (result.next()) {
+      val user = User(
+        userId = result.getInt("user_id"),
+        nom = result.getString("user_name"),
+        vehicule = result.getString("user_vehicule"),
+        note = result.getInt("user_note"),
+        nombreNote = result.getInt("user_nb_notes")
+      )
+      users = user :: users
+    }
+    users.reverse
+  }
 }

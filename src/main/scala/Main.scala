@@ -26,10 +26,10 @@ def main(): Unit = {
       choix match {
         case 1 =>
           user = UserDAO.userInscription()
-            if(user==null)
-              println("/!\\ Erreur lors de l'inscription")
-            else
-              println("///Inscription reussie")
+          if(user==null)
+            println("/!\\ Erreur lors de l'inscription")
+          else
+            println("///Inscription reussie")
         case 2 =>
           user = UserDAO.userConnexion()
           if(user == null)
@@ -76,10 +76,9 @@ def main(): Unit = {
         case _ =>
           println("Commande invalide !")
       }
-      }
     }
   }
-
+}
 
 
 
