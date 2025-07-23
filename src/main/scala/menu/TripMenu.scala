@@ -128,14 +128,15 @@ object TripMenu {
   }
 
   private def afficherTrajetsPassees(user: User): Unit = {
-    val maintenant = LocalDateTime.now()
-    val tousLesTrajets = TripDAO.findAll()
-    val trajetsPassees = tousLesTrajets.filter(t =>
-      t.tripDriverUserId == user.userId && t.tripDate.isBefore(maintenant)
-    ).sortBy(_.tripDate)(Ordering[LocalDateTime].reverse)
-
     var continuer = true
     while (continuer) {
+      // Move data fetching inside the loop
+      val maintenant = LocalDateTime.now()
+      val tousLesTrajets = TripDAO.findAll()
+      val trajetsPassees = tousLesTrajets.filter(t =>
+        t.tripDriverUserId == user.userId && t.tripDate.isBefore(maintenant)
+      ).sortBy(_.tripDate)(Ordering[LocalDateTime].reverse)
+
       println("\n| Trajets passés")
       println("0. Retour à mes trajets")
 
@@ -161,6 +162,7 @@ object TripMenu {
           continuer = false
         } else if (choix > 0 && choix <= trajetsPassees.length) {
           afficherDetailTrajet(trajetsPassees(choix - 1), user, true)
+          // After returning from detail, the loop will refresh the data
         } else {
           println("Choix invalide !")
         }
@@ -177,7 +179,7 @@ object TripMenu {
 
     println(s"\n| Détail du trajet")
     println(s"| $villeDepart → $villeArrivee")
-    println(s"| Conducteur : ${user.nom} (${if (user.nombreNote > 0) (user.note.toDouble / user.nombreNote).formatted("%.1f") else "Pas de note"})")
+    println(s"| Conducteur : ${user.nom} (${if (user.nombreNote > 0) user.note.formatted("%.1f") else "Pas de note"}/5)")
     println(s"| Départ : $dateFormatee $heureFormatee")
     println(s"| Véhicule : ${user.vehicule}")
     println(s"| Prix : ${trajet.tripPrice} €")
@@ -222,44 +224,51 @@ object TripMenu {
   }
 
   private def noterPassagers(trajet: Trip, reservations: List[Reservation]): Unit = {
-    println("\n| Noter les passagers")
+    var continuer = true
 
-    val passagersNonNotes = reservations.filter(r => r.resIsRated.isEmpty || r.resIsRated.contains(false))
+    while (continuer) {
+      // Refresh reservation data each time to get updated resIsRated values
+      val reservationsActuelles = ReservationDAO.findByTripId(trajet.tripId)
+      val passagersNonNotes = reservationsActuelles.filter(r => r.resIsRated.isEmpty || r.resIsRated.contains(false))
 
-    if (passagersNonNotes.isEmpty) {
-      println("Tous les passagers ont déjà été notés")
-      println("Appuyez sur Entrée pour continuer...")
-      StdIn.readLine()
-      return
-    }
+      println("\n| Noter les passagers")
 
-    println("Passagers à noter :")
-    println("0. Retour")
+      if (passagersNonNotes.isEmpty) {
+        println("Tous les passagers ont déjà été notés")
+        println("Appuyez sur Entrée pour continuer...")
+        StdIn.readLine()
+        continuer = false
+      } else {
+        println("Passagers à noter :")
+        println("0. Retour")
 
-    passagersNonNotes.zipWithIndex.foreach { case (reservation, index) =>
-      UserDAO.userFindById(reservation.resPassengerUserId) match {
-        case Some(passager) =>
-          println(s"${index + 1}. ${passager.nom}")
-        case None =>
-          println(s"${index + 1}. Passager introuvable")
+        passagersNonNotes.zipWithIndex.foreach { case (reservation, index) =>
+          UserDAO.userFindById(reservation.resPassengerUserId) match {
+            case Some(passager) =>
+              println(s"${index + 1}. ${passager.nom}")
+            case None =>
+              println(s"${index + 1}. Passager introuvable")
+          }
+        }
+
+        println("\nSelectionnez le passager à noter :")
+        val choix = StdIn.readInt()
+
+        if (choix == 0) {
+          continuer = false
+        } else if (choix > 0 && choix <= passagersNonNotes.length) {
+          val reservation = passagersNonNotes(choix - 1)
+          UserDAO.userFindById(reservation.resPassengerUserId) match {
+            case Some(passager) =>
+              noterPassager(reservation, passager)
+            // After rating, the loop will refresh the data automatically
+            case None =>
+              println("Passager introuvable")
+          }
+        } else {
+          println("Choix invalide !")
+        }
       }
-    }
-
-    println("\nSelectionnez le passager à noter :")
-    val choix = StdIn.readInt()
-
-    if (choix == 0) {
-      return
-    } else if (choix > 0 && choix <= passagersNonNotes.length) {
-      val reservation = passagersNonNotes(choix - 1)
-      UserDAO.userFindById(reservation.resPassengerUserId) match {
-        case Some(passager) =>
-          noterPassager(reservation, passager)
-        case None =>
-          println("Passager introuvable")
-      }
-    } else {
-      println("Choix invalide !")
     }
   }
 

@@ -75,7 +75,7 @@ object TripSearchMenu {
     trips.foreach { trip =>
       val driver = UserDAO.userFindById(trip.tripDriverUserId).get
       val noteAffichee = if (driver.nombreNote > 0) {
-        (driver.note.toDouble / driver.nombreNote).formatted("%.1f")
+        driver.note.formatted("%.1f")
       } else {
         "Pas de note"
       }
@@ -104,7 +104,7 @@ object TripSearchMenu {
 
     val driver = UserDAO.userFindById(chosenTrip.tripDriverUserId).get
     val noteAffichee = if (driver.nombreNote > 0) {
-      (driver.note.toDouble / driver.nombreNote).formatted("%.1f")
+      driver.note.formatted("%.1f")
     } else {
       "Pas de note"
     }

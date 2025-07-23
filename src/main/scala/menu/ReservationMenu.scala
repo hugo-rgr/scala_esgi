@@ -78,17 +78,18 @@ object ReservationMenu {
   }
 
   private def afficherReservationsPassees(user: User): Unit = {
-    val maintenant = LocalDateTime.now()
-    val reservations = ReservationDAO.findByPassengerUserId(user.userId)
-    val reservationsPassees = reservations.filter { reservation =>
-      TripDAO.find(reservation.tripId) match {
-        case Some(trip) => trip.tripDate.isBefore(maintenant)
-        case None => false
-      }
-    }.sortBy(_.resDate)(Ordering[LocalDateTime].reverse)
-
     var continuer = true
     while (continuer) {
+      // Move the data fetching inside the loop so it refreshes each time
+      val maintenant = LocalDateTime.now()
+      val reservations = ReservationDAO.findByPassengerUserId(user.userId)
+      val reservationsPassees = reservations.filter { reservation =>
+        TripDAO.find(reservation.tripId) match {
+          case Some(trip) => trip.tripDate.isBefore(maintenant)
+          case None => false
+        }
+      }.sortBy(_.resDate)(Ordering[LocalDateTime].reverse)
+
       println("\n| Réservations passées")
       println("0. Retour aux réservations")
 
@@ -123,6 +124,7 @@ object ReservationMenu {
           continuer = false
         } else if (choix > 0 && choix <= reservationsPassees.length) {
           afficherDetailReservation(reservationsPassees(choix - 1), user, true)
+          // After returning from detail, the loop will refresh the data
         } else {
           println("Choix invalide !")
         }
@@ -142,7 +144,7 @@ object ReservationMenu {
           case Some(conducteur) =>
             println(s"\n| Détail de la réservation")
             println(s"| $villeDepart → $villeArrivee")
-            println(s"| Conducteur : ${conducteur.nom} (${if (conducteur.nombreNote > 0) (conducteur.note.toDouble / conducteur.nombreNote).formatted("%.1f") else "Pas de note"}/5)")
+            println(s"| Conducteur : ${conducteur.nom} (${if (conducteur.nombreNote > 0) conducteur.note.formatted("%.1f") else "Pas de note"}/5)")
             println(s"| Départ : $dateFormatee $heureFormatee")
             println(s"| Véhicule : ${conducteur.vehicule}")
             println(s"| Prix payé : ${reservation.resPassengerTripPrice} €")

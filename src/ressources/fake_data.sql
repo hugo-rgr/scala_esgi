@@ -1,8 +1,15 @@
--- BlablaCar Test Data
+-- BlablaCar Test Data - Comprehensive test dataset for two users
 -- First, make sure to use the correct database
 USE BLABLACAR;
 
--- Insert Cities
+-- Clear existing data (optional, uncomment if needed)
+-- DELETE FROM Message;
+-- DELETE FROM Reservation;
+-- DELETE FROM Trip;
+-- DELETE FROM User;
+-- DELETE FROM City;
+
+-- Insert Cities (enough for varied testing)
 INSERT INTO City (city_name) VALUES
                                  ('Paris'),
                                  ('Lyon'),
@@ -10,113 +17,114 @@ INSERT INTO City (city_name) VALUES
                                  ('Toulouse'),
                                  ('Nice'),
                                  ('Nantes'),
-                                 ('Strasbourg'),
-                                 ('Montpellier'),
                                  ('Bordeaux'),
                                  ('Lille'),
-                                 ('Rennes'),
-                                 ('Reims'),
-                                 ('Le Havre'),
-                                 ('Saint-Étienne'),
-                                 ('Toulon');
+                                 ('Strasbourg'),
+                                 ('Montpellier');
 
--- Insert Users with varied profiles
+-- Insert Test Users
 INSERT INTO User (user_name, user_hash_pwd, user_vehicule, user_note, user_nb_notes) VALUES
-                                                                                         ('alice_martin', 'password123', 'Renault Clio', 85, 17),
-                                                                                         ('bob_durand', 'motdepasse456', 'Peugeot 308', 92, 25),
-                                                                                         ('claire_bernard', 'secret789', 'Citroën C3', 78, 12),
-                                                                                         ('david_petit', 'pass2023', 'Volkswagen Golf', 88, 31),
-                                                                                         ('emma_rousseau', 'mypass321', 'Ford Fiesta', 95, 42),
-                                                                                         ('florent_moreau', 'secure123', 'Opel Corsa', 82, 19),
-                                                                                         ('sophie_laurent', 'password789', 'Renault Megane', 90, 28),
-                                                                                         ('julien_simon', 'motdepasse2023', 'Peugeot 207', 76, 8),
-                                                                                         ('marie_michel', 'secret456', 'Citroën C4', 93, 35),
-                                                                                         ('pierre_leroy', 'mypassword', 'BMW Serie 1', 87, 22),
-                                                                                         ('test_user', 'test123', 'Tesla Model 3', 0, 0),
-                                                                                         ('demo_driver', 'demo456', 'Toyota Yaris', 89, 15);
+-- Main test users
+('test_user1', 'password123', 'Renault Clio Bleue', 4.2, 17),  -- Mainly driver (4.2/5 with 17 ratings)
+('test_user2', 'password456', 'Peugeot 308 Grise', 4.6, 12),   -- Mainly passenger (4.6/5 with 12 ratings)
 
--- Insert Trips (mix of past, current, and future trips)
--- Past trips (completed)
+-- Additional users for more realistic testing
+('alice_martin', 'alice123', 'Citroën C3', 3.8, 25),    -- 3.8/5 with 25 ratings
+('bob_durand', 'bob456', 'Volkswagen Golf', 4.5, 30),   -- 4.5/5 with 30 ratings
+('claire_bernard', 'claire789', 'Ford Fiesta', 3.9, 15); -- 3.9/5 with 15 ratings
+
+-- Insert Trips for comprehensive testing
+
+-- === PAST TRIPS (for rating testing) ===
+
+-- 1. Past trip: test_user1 (driver) -> test_user2 was passenger (NOT YET RATED by passenger)
 INSERT INTO Trip (trip_departure_city_id, trip_arrival_city_id, trip_date, trip_driver_user_id, trip_passengers_seats_number, trip_price) VALUES
-                                                                                                                                              (1, 2, '2024-06-15 08:30:00', 1, 0, 25.50),  -- Paris to Lyon
-                                                                                                                                              (2, 3, '2024-06-20 14:15:00', 2, 1, 35.00),  -- Lyon to Marseille
-                                                                                                                                              (3, 4, '2024-07-01 09:45:00', 3, 0, 42.75),  -- Marseille to Toulouse
-                                                                                                                                              (4, 5, '2024-07-10 16:20:00', 4, 2, 28.90),  -- Toulouse to Nice
-                                                                                                                                              (1, 6, '2024-07-15 07:00:00', 5, 0, 38.50);  -- Paris to Nantes
+    (1, 2, '2025-07-15 09:00:00', 1, 0, 25.50);  -- Paris to Lyon, driver: test_user1
+SET @past_trip_1 = LAST_INSERT_ID();
 
--- Current/Future trips (available for booking)
+-- 2. Past trip: test_user1 (driver) -> test_user2 was passenger (ALREADY RATED by passenger)
 INSERT INTO Trip (trip_departure_city_id, trip_arrival_city_id, trip_date, trip_driver_user_id, trip_passengers_seats_number, trip_price) VALUES
-                                                                                                                                              (1, 2, '2025-08-01 09:00:00', 6, 3, 30.00),  -- Paris to Lyon
-                                                                                                                                              (2, 1, '2025-08-01 18:30:00', 7, 2, 30.00),  -- Lyon to Paris
-                                                                                                                                              (1, 3, '2025-08-02 08:15:00', 8, 4, 55.00),  -- Paris to Marseille
-                                                                                                                                              (3, 1, '2025-08-02 19:45:00', 9, 1, 55.00),  -- Marseille to Paris
-                                                                                                                                              (2, 4, '2025-08-03 10:30:00', 10, 2, 45.50), -- Lyon to Toulouse
-                                                                                                                                              (4, 2, '2025-08-03 17:00:00', 1, 3, 45.50),  -- Toulouse to Lyon
-                                                                                                                                              (1, 5, '2025-08-05 07:45:00', 2, 4, 65.75),  -- Paris to Nice
-                                                                                                                                              (5, 1, '2025-08-05 20:15:00', 3, 2, 65.75),  -- Nice to Paris
-                                                                                                                                              (6, 7, '2025-08-07 11:20:00', 4, 3, 52.25),  -- Nantes to Strasbourg
-                                                                                                                                              (7, 6, '2025-08-07 16:40:00', 5, 1, 52.25),  -- Strasbourg to Nantes
-                                                                                                                                              (1, 8, '2025-08-10 08:00:00', 11, 3, 48.00), -- Paris to Montpellier
-                                                                                                                                              (8, 1, '2025-08-10 19:30:00', 12, 2, 48.00), -- Montpellier to Paris
-                                                                                                                                              (2, 9, '2025-08-12 09:15:00', 6, 4, 58.50),  -- Lyon to Bordeaux
-                                                                                                                                              (9, 2, '2025-08-12 18:45:00', 7, 3, 58.50),  -- Bordeaux to Lyon
-                                                                                                                                              (1, 10, '2025-08-15 07:30:00', 8, 2, 62.00); -- Paris to Lille
+    (2, 3, '2025-07-10 14:30:00', 1, 1, 35.00);  -- Lyon to Marseille, driver: test_user1
+SET @past_trip_2 = LAST_INSERT_ID();
 
--- Insert Reservations (some for past trips, some for future trips)
+-- 3. Past trip: test_user2 (driver) -> test_user1 was passenger (NOT YET RATED by passenger)
+INSERT INTO Trip (trip_departure_city_id, trip_arrival_city_id, trip_date, trip_driver_user_id, trip_passengers_seats_number, trip_price) VALUES
+    (3, 4, '2025-07-12 16:00:00', 2, 2, 40.00);  -- Marseille to Toulouse, driver: test_user2
+SET @past_trip_3 = LAST_INSERT_ID();
+
+-- 4. Past trip: test_user1 (driver) with multiple passengers (for testing driver rating passengers)
+INSERT INTO Trip (trip_departure_city_id, trip_arrival_city_id, trip_date, trip_driver_user_id, trip_passengers_seats_number, trip_price) VALUES
+    (1, 5, '2025-07-08 08:00:00', 1, 0, 45.75);  -- Paris to Nice, driver: test_user1
+SET @past_trip_4 = LAST_INSERT_ID();
+
+-- === FUTURE TRIPS (for booking and reservation testing) ===
+
+-- 5. Future trip: test_user1 (driver) - available for test_user2 to book
+INSERT INTO Trip (trip_departure_city_id, trip_arrival_city_id, trip_date, trip_driver_user_id, trip_passengers_seats_number, trip_price) VALUES
+                                                                                                                                              (1, 2, '2025-08-15 10:00:00', 1, 3, 28.00),  -- Paris to Lyon, driver: test_user1
+                                                                                                                                              (2, 1, '2025-08-16 18:30:00', 1, 2, 28.00),  -- Lyon to Paris, driver: test_user1
+                                                                                                                                              (1, 6, '2025-08-20 07:45:00', 1, 4, 38.50),  -- Paris to Nantes, driver: test_user1
+                                                                                                                                              (4, 5, '2025-08-25 15:20:00', 1, 3, 42.00);  -- Toulouse to Nice, driver: test_user1
+
+-- 6. Future trip: test_user2 (driver) - available for test_user1 to book
+INSERT INTO Trip (trip_departure_city_id, trip_arrival_city_id, trip_date, trip_driver_user_id, trip_passengers_seats_number, trip_price) VALUES
+                                                                                                                                              (6, 7, '2025-08-18 09:30:00', 2, 3, 55.00),  -- Nantes to Bordeaux, driver: test_user2
+                                                                                                                                              (7, 8, '2025-08-22 13:15:00', 2, 2, 48.75);  -- Bordeaux to Lille, driver: test_user2
+
+-- 7. Additional future trips by other users (for search testing)
+INSERT INTO Trip (trip_departure_city_id, trip_arrival_city_id, trip_date, trip_driver_user_id, trip_passengers_seats_number, trip_price) VALUES
+                                                                                                                                              (1, 2, '2025-08-15 08:00:00', 3, 2, 30.00),  -- Paris to Lyon, driver: alice_martin (same route as test_user1)
+                                                                                                                                              (1, 2, '2025-08-15 12:00:00', 4, 4, 26.00),  -- Paris to Lyon, driver: bob_durand (same route, different time)
+                                                                                                                                              (2, 3, '2025-08-17 11:00:00', 5, 3, 38.00);  -- Lyon to Marseille, driver: claire_bernard
+
+-- === RESERVATIONS FOR TESTING ===
+
+-- Past reservations (completed trips)
 INSERT INTO Reservation (trip_id, res_passenger_user_id, res_is_canceled, res_passenger_trip_price, res_date, res_is_rated) VALUES
--- Past reservations (completed and rated)
-(1, 3, 0, 25.50, '2024-06-10 14:20:00', 1),  -- Claire reserved Alice's trip
-(1, 4, 0, 25.50, '2024-06-11 09:15:00', 1),  -- David reserved Alice's trip
-(1, 5, 0, 25.50, '2024-06-12 16:45:00', 1),  -- Emma reserved Alice's trip
-(2, 6, 0, 35.00, '2024-06-18 11:30:00', 1),  -- Florent reserved Bob's trip
-(2, 7, 0, 35.00, '2024-06-19 08:45:00', 1),  -- Sophie reserved Bob's trip
-(3, 8, 0, 42.75, '2024-06-28 13:20:00', 1),  -- Julien reserved Claire's trip
-(3, 9, 0, 42.75, '2024-06-29 10:10:00', 1),  -- Marie reserved Claire's trip
-(3, 10, 0, 42.75, '2024-06-30 15:35:00', 1), -- Pierre reserved Claire's trip
+-- Trip 1: test_user2 reserved test_user1's trip (NOT YET RATED - can test passenger rating driver)
+(@past_trip_1, 2, 0, 25.50, '2025-07-10 14:20:00', 0),
 
--- Future reservations (not yet rated)
-(6, 11, 0, 30.00, '2025-07-25 14:30:00', 0),  -- test_user reserved Florent's trip
-(7, 12, 0, 30.00, '2025-07-26 09:45:00', 0),  -- demo_driver reserved Sophie's trip
-(8, 1, 0, 55.00, '2025-07-27 11:20:00', 0),   -- Alice reserved Julien's trip
-(9, 2, 0, 55.00, '2025-07-28 16:15:00', 0),   -- Bob reserved Marie's trip
-(10, 3, 0, 45.50, '2025-07-29 13:40:00', 0),  -- Claire reserved Pierre's trip
-(10, 4, 0, 45.50, '2025-07-30 10:25:00', 0),  -- David reserved Pierre's trip
-(11, 5, 0, 45.50, '2025-07-31 12:10:00', 0),  -- Emma reserved Alice's trip
-(12, 6, 0, 65.75, '2025-08-01 15:50:00', 0),  -- Florent reserved Bob's trip
-(12, 7, 0, 65.75, '2025-08-02 08:30:00', 0),  -- Sophie reserved Bob's trip
-(13, 8, 0, 65.75, '2025-08-03 14:15:00', 0);  -- Julien reserved Claire's trip
+-- Trip 2: test_user2 reserved test_user1's trip (ALREADY RATED - test that re-rating is blocked)
+(@past_trip_2, 2, 0, 35.00, '2025-07-05 11:30:00', 1),
 
--- Insert Messages between users
+-- Trip 3: test_user1 reserved test_user2's trip (NOT YET RATED - can test passenger rating driver)
+(@past_trip_3, 1, 0, 40.00, '2025-07-11 13:45:00', 0),
+
+-- Trip 4: Multiple passengers for test_user1's trip (test driver rating passengers)
+(@past_trip_4, 2, 0, 45.75, '2025-07-05 16:30:00', 0),  -- test_user2 (NOT YET RATED by driver)
+(@past_trip_4, 3, 0, 45.75, '2025-07-06 09:15:00', 1),  -- alice_martin (ALREADY RATED by driver)
+(@past_trip_4, 4, 0, 45.75, '2025-07-07 12:40:00', 0);  -- bob_durand (NOT YET RATED by driver)
+
+-- Future reservations (upcoming trips)
+-- Get the IDs of future trips for reservations
+SET @future_trip_1 = (SELECT trip_id FROM Trip WHERE trip_date = '2025-08-15 10:00:00' AND trip_driver_user_id = 1);
+SET @future_trip_2 = (SELECT trip_id FROM Trip WHERE trip_date = '2025-08-18 09:30:00' AND trip_driver_user_id = 2);
+
+INSERT INTO Reservation (trip_id, res_passenger_user_id, res_is_canceled, res_passenger_trip_price, res_date, res_is_rated) VALUES
+-- Future reservations (test viewing upcoming reservations)
+(@future_trip_1, 2, 0, 28.00, '2025-08-10 10:15:00', 0),  -- test_user2 reserved test_user1's future trip
+(@future_trip_2, 1, 0, 55.00, '2025-08-12 15:20:00', 0);  -- test_user1 reserved test_user2's future trip
+
+-- Update trip passenger counts after reservations
+UPDATE Trip SET trip_passengers_seats_number = trip_passengers_seats_number - 1 WHERE trip_id = @future_trip_1;
+UPDATE Trip SET trip_passengers_seats_number = trip_passengers_seats_number - 1 WHERE trip_id = @future_trip_2;
+
+-- === MESSAGES FOR TESTING ===
 INSERT INTO Message (message_content, sender_user_id, recipient_user_id, message_date) VALUES
--- Messages related to trips and general communication
-('Salut ! J''ai réservé votre trajet Paris-Lyon. À quelle heure exacte partons-nous ?', 3, 1, '2024-06-10 14:25:00'),
-('Bonjour Claire ! Le départ est prévu à 8h30 précises. Rendez-vous devant la gare Montparnasse.', 1, 3, '2024-06-10 15:10:00'),
-('Parfait, merci pour l''info ! À demain', 3, 1, '2024-06-10 15:15:00'),
+-- Conversation between test users
+('Salut ! J''ai réservé votre trajet Paris-Lyon du 15 août. À quelle heure exacte partons-nous ?', 2, 1, '2025-08-10 10:20:00'),
+('Bonjour ! Le départ est prévu à 10h précises. Rendez-vous devant la gare Montparnasse, sortie 2.', 1, 2, '2025-08-10 11:45:00'),
+('Parfait, merci pour l''info ! À bientôt', 2, 1, '2025-08-10 12:00:00'),
 
-('Bonsoir, pouvez-vous me confirmer le point de rendez-vous pour le trajet de demain ?', 6, 2, '2024-06-19 20:30:00'),
-('Bonsoir ! Rendez-vous place Bellecour à Lyon, côté parking. Bon voyage !', 2, 6, '2024-06-19 21:15:00'),
+('Hello ! Concernant votre trajet Nantes-Bordeaux, avez-vous de la place pour un gros bagage ?', 1, 2, '2025-08-12 16:30:00'),
+('Salut ! Oui pas de problème, j''ai un grand coffre. Bon voyage !', 2, 1, '2025-08-12 17:15:00'),
 
-('Merci pour le super trajet aujourd''hui ! Très ponctuel et conduite agréable.', 8, 3, '2024-07-01 18:45:00'),
-('Merci beaucoup pour votre message ! Bon séjour à Toulouse', 3, 8, '2024-07-01 19:20:00'),
+('Merci pour l''excellent trajet Paris-Nice la semaine dernière ! Conduite très sûre.', 2, 1, '2025-07-16 09:30:00'),
+('Merci beaucoup pour votre message ! J''espère vous revoir bientôt sur mes trajets.', 1, 2, '2025-07-16 10:15:00'),
 
-('Hello ! Est-ce possible d''ajouter un arrêt rapide en route ?', 11, 6, '2025-07-25 16:30:00'),
-('Salut ! Malheureusement ce ne sera pas possible cette fois, désolé.', 6, 11, '2025-07-25 17:45:00'),
-('Pas de souci, merci quand même !', 11, 6, '2025-07-25 18:00:00'),
+('Petite question : acceptez-vous les animaux de compagnie pour le prochain trajet ?', 3, 1, '2025-08-13 14:20:00'),
+('Bonjour Alice ! Désolé mais je ne peux pas prendre d''animaux cette fois.', 1, 3, '2025-08-13 15:45:00'),
 
-('Avez-vous de la place pour un bagage supplémentaire ?', 12, 7, '2025-07-26 12:20:00'),
-('Oui pas de problème, le coffre est assez grand.', 7, 12, '2025-07-26 13:10:00'),
+('Bonjour, y a-t-il un arrêt possible en cours de route ?', 4, 2, '2025-08-14 11:30:00'),
+('Bonjour Bob ! On peut voir ça ensemble, envoyez-moi un message privé.', 2, 4, '2025-08-14 12:20:00');
 
-('Bonjour, y a-t-il la climatisation dans votre véhicule ?', 1, 8, '2025-07-27 14:15:00'),
-('Bonjour Alice ! Oui bien sûr, clim et musique disponibles.', 8, 1, '2025-07-27 15:30:00'),
-
-('Salut ! Pouvons-nous partir 15 minutes plus tôt si possible ?', 2, 9, '2025-07-28 19:00:00'),
-('Salut Bob ! Malheureusement l''horaire est fixe, désolée.', 9, 2, '2025-07-28 19:45:00'),
-
-('Excellent trajet la semaine dernière ! Merci encore', 5, 1, '2024-06-22 10:30:00'),
-('Avec plaisir Emma ! À bientôt sur les routes', 1, 5, '2024-06-22 11:15:00'),
-
-('Petite question : acceptez-vous les animaux de compagnie ?', 4, 10, '2025-07-30 16:20:00'),
-('Bonjour David ! Désolé mais pas d''animaux cette fois.', 10, 4, '2025-07-30 17:05:00'),
-
-('Merci pour le trajet rapide et sécurisé hier !', 9, 3, '2024-07-02 09:15:00'),
-('Merci Marie ! Bon week-end à Toulouse', 3, 9, '2024-07-02 10:30:00');

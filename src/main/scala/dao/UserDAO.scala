@@ -19,7 +19,7 @@ object UserDAO {
         userId = result.getInt("user_id"),
         nom = result.getString("user_name"),
         vehicule = result.getString("user_vehicule"),
-        note = result.getInt("user_note"),
+        note = result.getDouble("user_note"),
         nombreNote = result.getInt("user_nb_notes")
       )
     } else null
@@ -73,7 +73,7 @@ object UserDAO {
         userId = result.getInt("user_id"),
         nom = result.getString("user_name"),
         vehicule = result.getString("user_vehicule"),
-        note = result.getInt("user_note"),
+        note = result.getDouble("user_note"),
         nombreNote = result.getInt("user_nb_notes")
       ))
     } else {
@@ -102,26 +102,23 @@ object UserDAO {
   // Nouvelle méthode pour noter un utilisateur
   def noterUtilisateur(userId: Int, nouvelleNote: Int): Boolean = {
     try {
-      // Récupérer l'utilisateur actuel
       val userOpt = userFindById(userId)
       userOpt match {
         case Some(user) =>
-          // Calculer la nouvelle moyenne
-          val ancienneNote = user.note
+          val ancienneMoyenne = user.note          // Already the average
           val ancienNombreNotes = user.nombreNote
 
           val nouvelleMoyenne = if (ancienNombreNotes == 0) {
-            nouvelleNote
+            nouvelleNote.toDouble
           } else {
-            (ancienneNote * ancienNombreNotes + nouvelleNote) / (ancienNombreNotes + 1)
+            (ancienneMoyenne * ancienNombreNotes + nouvelleNote) / (ancienNombreNotes + 1)
           }
 
           val nouveauNombreNotes = ancienNombreNotes + 1
 
-          // Mettre à jour la base de données
           val requete = "UPDATE User SET user_note = ?, user_nb_notes = ? WHERE user_id = ?"
           val statement = DBConnection.connection.prepareStatement(requete)
-          statement.setInt(1, nouvelleMoyenne)
+          statement.setDouble(1, nouvelleMoyenne)  // ← setDouble instead of setInt
           statement.setInt(2, nouveauNombreNotes)
           statement.setInt(3, userId)
 
