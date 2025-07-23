@@ -1,10 +1,9 @@
 import Utils.DBConnection
-import models.User
 import dao.UserDAO
-import menu.TripSearchMenu
+import models.User
+import menu.{MessageMenu, TripMenu, TripSearchMenu}
 
-import scala.io.StdIn
-import menu.TripMenu  // Import du nouveau module
+import scala.io.StdIn  // Import du nouveau module
 
 @main
 def main(): Unit = {
@@ -63,7 +62,7 @@ def main(): Unit = {
           TripMenu.afficherMenu(user)
 
         case 3 =>
-          println("Messagerie")
+          MessageMenu.afficherMenu(user)
 
         case 4 =>
           val result = UserDAO.gestionCompte(user.userId)
