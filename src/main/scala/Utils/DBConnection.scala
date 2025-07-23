@@ -1,9 +1,11 @@
+package Utils
+
 import java.sql.DriverManager
 
 object DBConnection {
-  val url = "jdbc:mysql://127.0.0.1:3306/scala_db"
-  val username = "root"
-  val password = "mysql"
+  val url =  Config.dbUrl
+  val username = Config.dbUser
+  val password = Config.dbPass
   var connection: java.sql.Connection = null
   try {
     connection = DriverManager.getConnection(url, username, password)
