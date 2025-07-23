@@ -1,7 +1,8 @@
-import Utils.DBConnection
 import models.User
 import dao.UserDAO
 import menu.TripSearchMenu
+
+import menu.UserMenu
 
 import scala.io.StdIn
 import menu.TripMenu  // Import du nouveau module
@@ -10,8 +11,6 @@ import menu.TripMenu  // Import du nouveau module
 def main(): Unit = {
   var user: User = null
   var continue = true
-
-  val statement = DBConnection.connection
 
   while (continue) {
     if (user == null) {
@@ -25,13 +24,13 @@ def main(): Unit = {
 
       choix match {
         case 1 =>
-          user = UserDAO.userInscription()
+          user = UserMenu.inscription()
             if(user==null)
               println("/!\\ Erreur lors de l'inscription")
             else
               println("///Inscription reussie")
         case 2 =>
-          user = UserDAO.userConnexion()
+          user = UserMenu.connexion()
           if(user == null)
             println("/!\\ Nom d'utilisateur ou mots de passe incorect ")
           else
@@ -66,8 +65,8 @@ def main(): Unit = {
           println("Messagerie")
 
         case 4 =>
-          val result = UserDAO.gestionCompte(user.userId)
-          if(result == 0)
+          val result = UserMenu.gestionCompte(user)
+          if(result == null)
             user = null
         case 5 =>
           println("A bientôt")
