@@ -26,7 +26,8 @@ object ReservationDAO {
   }
 
   def findAll(): List[Reservation] = {
-    val requete = "SELECT * FROM Reservation AND res_is_canceled = 0"
+    // Correction: utiliser WHERE au lieu de AND
+    val requete = "SELECT * FROM Reservation WHERE res_is_canceled = 0"
     val statement = DBConnection.connection.createStatement()
     val result = statement.executeQuery(requete)
     var reservations = List[Reservation]()
@@ -56,7 +57,7 @@ object ReservationDAO {
 
     reservation.resIsRated match {
       case Some(value) => statement.setBoolean(6, value)
-      case None => statement.setNull(6, java.sql.Types.BIT)
+      case None => statement.setNull(6, java.sql.Types.BOOLEAN)
     }
 
     statement.executeUpdate()
@@ -80,7 +81,7 @@ object ReservationDAO {
 
     reservation.resIsRated match {
       case Some(value) => statement.setBoolean(6, value)
-      case None => statement.setNull(6, java.sql.Types.BIT)
+      case None => statement.setNull(6, java.sql.Types.BOOLEAN)
     }
 
     statement.setInt(7, reservation.resId)
@@ -93,7 +94,7 @@ object ReservationDAO {
 
     isRated match {
       case Some(value) => statement.setBoolean(1, value)
-      case None => statement.setNull(1, java.sql.Types.BIT)
+      case None => statement.setNull(1, java.sql.Types.BOOLEAN)
     }
 
     statement.setInt(2, resId)
@@ -106,7 +107,7 @@ object ReservationDAO {
 
     isCanceled match {
       case Some(value) => statement.setBoolean(1, value)
-      case None => statement.setNull(1, java.sql.Types.BIT)
+      case None => statement.setNull(1, java.sql.Types.BOOLEAN)
     }
 
     statement.setInt(2, resId)
@@ -164,4 +165,3 @@ object ReservationDAO {
     reservations.reverse
   }
 }
-

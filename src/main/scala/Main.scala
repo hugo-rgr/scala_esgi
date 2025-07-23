@@ -2,7 +2,7 @@ import Utils.DBConnection
 import models.User
 import dao.UserDAO
 import scala.io.StdIn
-import menu.TripMenu  // Import du nouveau module
+import menu.TripMenu
 
 @main
 def main(): Unit = {
@@ -24,10 +24,10 @@ def main(): Unit = {
       choix match {
         case 1 =>
           user = UserDAO.userInscription()
-            if(user==null)
-              println("/!\\ Erreur lors de l'inscription")
-            else
-              println("///Inscription reussie")
+          if(user == null)
+            println("/!\\ Erreur lors de l'inscription")
+          else
+            println("///Inscription reussie")
         case 2 =>
           user = UserDAO.userConnexion()
           if(user == null)
@@ -37,7 +37,6 @@ def main(): Unit = {
         case 3 =>
           println("A bientôt")
           continue = false
-
         case _ =>
           println("Commande invalide !")
       }
@@ -55,18 +54,17 @@ def main(): Unit = {
 
       choix match {
         case 1 =>
-          println("Utilisateur")
+          println("Recherche de trajet - Fonctionnalité à implémenter")
 
         case 2 =>
           TripMenu.afficherMenu(user)
 
         case 3 =>
-          println("Messagerie")
+          println("Messagerie - Fonctionnalité à implémenter")
 
         case 4 =>
-          val result = UserDAO.gestionCompte(user.userId)
-          if(result == 0)
-            user = null
+          println("Mon compte - Fonctionnalité à implémenter")
+
         case 5 =>
           println("A bientôt")
           continue = false
@@ -74,10 +72,6 @@ def main(): Unit = {
         case _ =>
           println("Commande invalide !")
       }
-      }
     }
   }
-
-
-
-
+}
