@@ -89,16 +89,20 @@ object TripMenu {
   private def afficherTrajetsAVenir(user: User): Unit = {
     val maintenant = LocalDateTime.now()
 
-    // CONDUCTEUR: Récupérer les trajets depuis Trip où je suis conducteur
-    val trajetsAVenirConducteur = TripDAO.findAll().filter(trip =>
-      trip.tripDriverUserId == user.userId && trip.tripDate.isAfter(maintenant)
+    // Trajets en tant que conducteur - récupérés depuis Trip
+    val trajetsAVenirConducteur = TripDAO.findAll().filter(t =>
+      t.tripDriverUserId == user.userId && t.tripDate.isAfter(maintenant)
     ).sortBy(_.tripDate)
 
-    // PASSAGER: Récupérer les trajets depuis Reservation où je suis passager
+    // Trajets en tant que passager - récupérés depuis Reservation
     val reservationsAVenir = ReservationDAO.findByPassengerUserId(user.userId).filter { reservation =>
-      !reservation.resIsCanceled &&
-        TripDAO.find(reservation.tripId).exists(_.tripDate.isAfter(maintenant))
-    }.sortBy(res => TripDAO.find(res.tripId).get.tripDate)
+      TripDAO.find(reservation.tripId) match {
+        case Some(trip) => trip.tripDate.isAfter(maintenant)
+        case None => false
+      }
+    }.sortBy { reservation =>
+      TripDAO.find(reservation.tripId).get.tripDate
+    }
 
     var continuer = true
     while (continuer) {
@@ -107,26 +111,26 @@ object TripMenu {
 
       var index = 1
 
-      // Afficher trajets CONDUCTEUR
+      // Afficher trajets conducteur
       if (trajetsAVenirConducteur.nonEmpty) {
         println("\n--- En tant que conducteur ---")
-        trajetsAVenirConducteur.foreach { trip =>
-          val villeDepart = CityDAO.find(trip.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
-          val villeArrivee = CityDAO.find(trip.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
-          val dateFormatee = trip.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+        trajetsAVenirConducteur.foreach { trajet =>
+          val villeDepart = CityDAO.find(trajet.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
+          val villeArrivee = CityDAO.find(trajet.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
+          val dateFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
           println(s"$index. $villeDepart - $villeArrivee ($dateFormatee) [CONDUCTEUR]")
           index += 1
         }
       }
 
-      // Afficher trajets PASSAGER
+      // Afficher trajets passager
       if (reservationsAVenir.nonEmpty) {
         println("\n--- En tant que passager ---")
         reservationsAVenir.foreach { reservation =>
-          val trip = TripDAO.find(reservation.tripId).get
-          val villeDepart = CityDAO.find(trip.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
-          val villeArrivee = CityDAO.find(trip.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
-          val dateFormatee = trip.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+          val trajet = TripDAO.find(reservation.tripId).get
+          val villeDepart = CityDAO.find(trajet.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
+          val villeArrivee = CityDAO.find(trajet.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
+          val dateFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
           println(s"$index. $villeDepart - $villeArrivee ($dateFormatee) [PASSAGER]")
           index += 1
         }
@@ -144,10 +148,10 @@ object TripMenu {
       } else if (choix > 0 && choix < index) {
         val choixAjuste = choix - 1
         if (choixAjuste < trajetsAVenirConducteur.length) {
-          // Trajet CONDUCTEUR - géré depuis Trip
+          // Trajet conducteur
           afficherDetailTrajetConducteur(trajetsAVenirConducteur(choixAjuste), user, estPasse = false)
         } else {
-          // Trajet PASSAGER - géré depuis Reservation
+          // Trajet passager - utiliser la réservation
           val indexPassager = choixAjuste - trajetsAVenirConducteur.length
           val reservation = reservationsAVenir(indexPassager)
           afficherDetailTrajetPassager(reservation, user, estPasse = false)
@@ -161,16 +165,20 @@ object TripMenu {
   private def afficherTrajetsPassees(user: User): Unit = {
     val maintenant = LocalDateTime.now()
 
-    // CONDUCTEUR: Récupérer les trajets depuis Trip où je suis conducteur
-    val trajetsPasseesConducteur = TripDAO.findAll().filter(trip =>
-      trip.tripDriverUserId == user.userId && trip.tripDate.isBefore(maintenant)
+    // Trajets passés en tant que conducteur - récupérés depuis Trip
+    val trajetsPasseesConducteur = TripDAO.findAll().filter(t =>
+      t.tripDriverUserId == user.userId && t.tripDate.isBefore(maintenant)
     ).sortBy(_.tripDate)(Ordering[LocalDateTime].reverse)
 
-    // PASSAGER: Récupérer les trajets depuis Reservation où je suis passager
+    // Trajets passés en tant que passager - récupérés depuis Reservation
     val reservationsPassees = ReservationDAO.findByPassengerUserId(user.userId).filter { reservation =>
-      !reservation.resIsCanceled &&
-        TripDAO.find(reservation.tripId).exists(_.tripDate.isBefore(maintenant))
-    }.sortBy(res => TripDAO.find(res.tripId).get.tripDate)(Ordering[LocalDateTime].reverse)
+      TripDAO.find(reservation.tripId) match {
+        case Some(trip) => trip.tripDate.isBefore(maintenant)
+        case None => false
+      }
+    }.sortBy { reservation =>
+      TripDAO.find(reservation.tripId).get.tripDate
+    }(Ordering[LocalDateTime].reverse)
 
     var continuer = true
     while (continuer) {
@@ -179,26 +187,26 @@ object TripMenu {
 
       var index = 1
 
-      // Afficher trajets CONDUCTEUR
+      // Afficher trajets conducteur
       if (trajetsPasseesConducteur.nonEmpty) {
         println("\n--- En tant que conducteur ---")
-        trajetsPasseesConducteur.foreach { trip =>
-          val villeDepart = CityDAO.find(trip.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
-          val villeArrivee = CityDAO.find(trip.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
-          val dateFormatee = trip.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+        trajetsPasseesConducteur.foreach { trajet =>
+          val villeDepart = CityDAO.find(trajet.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
+          val villeArrivee = CityDAO.find(trajet.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
+          val dateFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
           println(s"$index. $villeDepart - $villeArrivee ($dateFormatee) [CONDUCTEUR]")
           index += 1
         }
       }
 
-      // Afficher trajets PASSAGER
+      // Afficher trajets passager
       if (reservationsPassees.nonEmpty) {
         println("\n--- En tant que passager ---")
         reservationsPassees.foreach { reservation =>
-          val trip = TripDAO.find(reservation.tripId).get
-          val villeDepart = CityDAO.find(trip.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
-          val villeArrivee = CityDAO.find(trip.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
-          val dateFormatee = trip.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+          val trajet = TripDAO.find(reservation.tripId).get
+          val villeDepart = CityDAO.find(trajet.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
+          val villeArrivee = CityDAO.find(trajet.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
+          val dateFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
           println(s"$index. $villeDepart - $villeArrivee ($dateFormatee) [PASSAGER]")
           index += 1
         }
@@ -216,10 +224,10 @@ object TripMenu {
       } else if (choix > 0 && choix < index) {
         val choixAjuste = choix - 1
         if (choixAjuste < trajetsPasseesConducteur.length) {
-          // Trajet CONDUCTEUR - géré depuis Trip
+          // Trajet conducteur
           afficherDetailTrajetConducteur(trajetsPasseesConducteur(choixAjuste), user, estPasse = true)
         } else {
-          // Trajet PASSAGER - géré depuis Reservation
+          // Trajet passager - utiliser la réservation
           val indexPassager = choixAjuste - trajetsPasseesConducteur.length
           val reservation = reservationsPassees(indexPassager)
           afficherDetailTrajetPassager(reservation, user, estPasse = true)
@@ -230,39 +238,47 @@ object TripMenu {
     }
   }
 
-  // GESTION CONDUCTEUR - basée sur Trip
-  private def afficherDetailTrajetConducteur(trip: Trip, user: User, estPasse: Boolean): Unit = {
-    val villeDepart = CityDAO.find(trip.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
-    val villeArrivee = CityDAO.find(trip.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
-    val dateFormatee = trip.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-    val heureFormatee = trip.tripDate.format(DateTimeFormatter.ofPattern("HH'h'mm"))
+  private def afficherDetailTrajetConducteur(trajet: Trip, user: User, estPasse: Boolean): Unit = {
+    val villeDepart = CityDAO.find(trajet.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
+    val villeArrivee = CityDAO.find(trajet.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
+    val dateFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    val heureFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("HH'h'mm"))
 
     // Récupérer les réservations pour ce trajet
-    val reservations = ReservationDAO.findByTripId(trip.tripId)
-    val passagers = reservations.map(res => UserDAO.find(res.resPassengerUserId)).collect { case Some(u) => u }
+    val reservations = ReservationDAO.findByTripId(trajet.tripId)
+    val passagersAvecReservations = reservations.map { reservation =>
+      val passager = UserDAO.find(reservation.resPassengerUserId).getOrElse(
+        User(userId = 0, nom = "Inconnu", vehicule = "Inconnu")
+      )
+      (passager, reservation)
+    }
 
     println(s"\n| Détail d'un trajet")
     println(s"| $villeDepart - $villeArrivee")
     println(s"| Conducteur : vous")
     println(s"| Départ : $dateFormatee $heureFormatee")
     println(s"| Véhicule : ${user.vehicule}")
-    println(s"| Prix : ${trip.tripPrice} €")
+    println(s"| Prix : ${trajet.tripPrice} €")
 
-    // Afficher les passagers
-    passagers.zipWithIndex.foreach { case (passager, index) =>
+    // Afficher les passagers avec leurs notes
+    passagersAvecReservations.zipWithIndex.foreach { case ((passager, reservation), index) =>
       val notePassager = if (passager.nombreNote > 0)
         f"${passager.note.toDouble / passager.nombreNote}%.1f"
       else "Pas de note"
       println(s"| Passager ${index + 1} : ${passager.nom} ($notePassager)")
     }
 
-    val placesRestantes = trip.tripPassengersSeatsNumber - reservations.length
+    val placesRestantes = trajet.tripPassengersSeatsNumber - reservations.length
     println(s"| $placesRestantes places restantes")
 
     // Options
     println("0. Retour")
-    if (estPasse && passagers.nonEmpty) {
-      println("1. Noter les passagers")
+    if (estPasse && passagersAvecReservations.nonEmpty) {
+      // Vérifier si toutes les réservations ont été notées
+      val reservationsNonNotees = reservations.filter(res => res.resIsRated.isEmpty || !res.resIsRated.get)
+      if (reservationsNonNotees.nonEmpty) {
+        println("1. Noter les passagers")
+      }
     }
     if (!estPasse) {
       println("2. Supprimer le trajet")
@@ -273,24 +289,25 @@ object TripMenu {
 
     choix match {
       case 0 => // Retour
-      case 1 if estPasse && passagers.nonEmpty =>
-        noterPassagersDuTrip(trip, reservations, passagers)
+      case 1 if estPasse && passagersAvecReservations.nonEmpty =>
+        noterPassagers(reservations, passagersAvecReservations.map(_._1))
       case 2 if !estPasse =>
-        supprimerTrajet(trip)
+        supprimerTrajet(trajet)
       case _ => println("Choix invalide !")
     }
   }
 
-  // GESTION PASSAGER - basée sur Reservation
   private def afficherDetailTrajetPassager(reservation: Reservation, user: User, estPasse: Boolean): Unit = {
-    val trip = TripDAO.find(reservation.tripId).get
-    val villeDepart = CityDAO.find(trip.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
-    val villeArrivee = CityDAO.find(trip.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
-    val dateFormatee = trip.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-    val heureFormatee = trip.tripDate.format(DateTimeFormatter.ofPattern("HH'h'mm"))
+    // Récupérer le trajet depuis la réservation
+    val trajet = TripDAO.find(reservation.tripId).get
+
+    val villeDepart = CityDAO.find(trajet.tripDepartureCityId).map(_.cityName).getOrElse("Inconnue")
+    val villeArrivee = CityDAO.find(trajet.tripArrivalCityId).map(_.cityName).getOrElse("Inconnue")
+    val dateFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    val heureFormatee = trajet.tripDate.format(DateTimeFormatter.ofPattern("HH'h'mm"))
 
     // Récupérer les informations du conducteur
-    val conducteur = UserDAO.find(trip.tripDriverUserId).getOrElse(
+    val conducteur = UserDAO.find(trajet.tripDriverUserId).getOrElse(
       User(userId = 0, nom = "Inconnu", vehicule = "Inconnu")
     )
     val noteConducteur = if (conducteur.nombreNote > 0)
@@ -304,8 +321,8 @@ object TripMenu {
     println(s"| Véhicule : ${conducteur.vehicule}")
     println(s"| Prix : ${reservation.resPassengerTripPrice} € - payé")
 
-    val reservations = ReservationDAO.findByTripId(trip.tripId)
-    val placesRestantes = trip.tripPassengersSeatsNumber - reservations.length
+    val toutesReservations = ReservationDAO.findByTripId(trajet.tripId)
+    val placesRestantes = trajet.tripPassengersSeatsNumber - toutesReservations.length
     println(s"| $placesRestantes places restantes")
 
     // Options
@@ -323,14 +340,14 @@ object TripMenu {
     choix match {
       case 0 => // Retour
       case 1 if estPasse && (reservation.resIsRated.isEmpty || !reservation.resIsRated.get) =>
-        noterConducteurDepuisReservation(conducteur, reservation)
+        noterConducteur(conducteur, reservation)
       case 2 if !estPasse =>
         annulerReservation(reservation)
       case _ => println("Choix invalide !")
     }
   }
 
-  private def noterConducteurDepuisReservation(conducteur: User, reservation: Reservation): Unit = {
+  private def noterConducteur(conducteur: User, reservation: Reservation): Unit = {
     println(s"\n| Noter ${conducteur.nom}")
     println("Renseignez votre note (sur 5) : ")
 
@@ -355,7 +372,7 @@ object TripMenu {
 
       UserDAO.update(conducteurMisAJour)
 
-      // Marquer la réservation comme notée
+      // Marquer cette réservation spécifique comme notée
       ReservationDAO.updateIsRated(reservation.resId, Some(true))
 
       println("/// Note prise en compte !")
@@ -368,21 +385,37 @@ object TripMenu {
     }
   }
 
-  private def noterPassagersDuTrip(trip: Trip, reservations: List[Reservation], passagers: List[User]): Unit = {
+  private def noterPassagers(reservations: List[Reservation], passagers: List[User]): Unit = {
     println("\n| Noter les passagers")
 
     try {
-      val notesPassagers = passagers.map { passager =>
+      // Associer chaque passager à sa réservation
+      val passagersAvecReservations = passagers.map { passager =>
+        val reservation = reservations.find(_.resPassengerUserId == passager.userId).get
+        (passager, reservation)
+      }
+
+      // Noter seulement les passagers dont la réservation n'a pas encore été notée
+      val passagersANoter = passagersAvecReservations.filter { case (_, reservation) =>
+        reservation.resIsRated.isEmpty || !reservation.resIsRated.get
+      }
+
+      if (passagersANoter.isEmpty) {
+        println("Tous les passagers ont déjà été notés")
+        return
+      }
+
+      val notesPassagers = passagersANoter.map { case (passager, reservation) =>
         println(s"Renseignez votre note pour ${passager.nom} (sur 5) : ")
         val note = StdIn.readDouble()
         if (note < 0 || note > 5) {
           throw new IllegalArgumentException("La note doit être entre 0 et 5")
         }
-        (passager, (note * 10).toInt)
+        (passager, reservation, (note * 10).toInt)
       }
 
       // Mettre à jour toutes les notes
-      notesPassagers.foreach { case (passager, noteEntiere) =>
+      notesPassagers.foreach { case (passager, reservation, noteEntiere) =>
         val nouvelleNoteTotal = passager.note + noteEntiere
         val nouveauNombreNotes = passager.nombreNote + 1
 
@@ -393,10 +426,8 @@ object TripMenu {
 
         UserDAO.update(passagerMisAJour)
 
-        // Marquer la réservation correspondante comme notée
-        reservations.find(_.resPassengerUserId == passager.userId).foreach { reservation =>
-          ReservationDAO.updateIsRated(reservation.resId, Some(true))
-        }
+        // Marquer la réservation spécifique comme notée
+        ReservationDAO.updateIsRated(reservation.resId, Some(true))
       }
 
       println("/// Notes prises en compte !")
@@ -411,18 +442,18 @@ object TripMenu {
     }
   }
 
-  private def supprimerTrajet(trip: Trip): Unit = {
+  private def supprimerTrajet(trajet: Trip): Unit = {
     println("Êtes-vous sûr de vouloir supprimer ce trajet ? (oui/non)")
     val confirmation = StdIn.readLine().trim.toLowerCase
 
     if (confirmation == "oui" || confirmation == "o") {
       try {
         // Supprimer d'abord toutes les réservations associées
-        val reservations = ReservationDAO.findByTripId(trip.tripId)
+        val reservations = ReservationDAO.findByTripId(trajet.tripId)
         reservations.foreach(res => ReservationDAO.delete(res.resId))
 
         // Puis supprimer le trajet
-        TripDAO.delete(trip.tripId)
+        TripDAO.delete(trajet.tripId)
         println("✓ Trajet supprimé avec succès !")
       } catch {
         case e: Exception =>
